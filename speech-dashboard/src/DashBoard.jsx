@@ -5,6 +5,7 @@ export default function Dashboard() {
   const { signOut } = useSignOut();
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState("");
+  const [interimTranscript, setInterimTranscript] = useState("");
 
   const mediaRecorderRef = useRef(null);
   const socketRef = useRef(null);
@@ -42,8 +43,13 @@ export default function Dashboard() {
       socket.onmessage = (message) => {
         const received = JSON.parse(message.data);
         const newTranscript = received.channel?.alternatives[0]?.transcript;
-        if (newTranscript && received.is_final) {
-          setTranscript((prev) => prev + " " + newTranscript);
+        if (newTranscript) {
+          if (received.is_final) {
+            setTranscript((prev) => prev + " " + newTranscript);
+            setInterimTranscript("");
+          } else {
+            setInterimTranscript(newTranscript);
+          }
         }
       };
 
@@ -68,64 +74,87 @@ export default function Dashboard() {
   };
 
   return (
-    <div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <h2>Live Speech-to-Text Dashboard</h2>
-        <button onClick={() => signOut()} style={{ padding: "0.5rem 1rem" }}>
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col sm:flex-row justify-between items-center bg-white p-6 rounded-xl shadow-sm">
+        <h2 className="text-2xl font-bold text-gray-800">
+          Live Speech-to-Text
+        </h2>
+        <button
+          onClick={() => signOut()}
+          className="mt-4 sm:mt-0 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition font-medium"
+        >
           Log Out
         </button>
       </div>
 
-      <div
-        style={{
-          marginTop: "2rem",
-          padding: "2rem",
-          border: "1px solid #ccc",
-          borderRadius: "8px",
-          minHeight: "200px",
-        }}
-      >
-        <p
-          style={{ color: "#555", fontStyle: transcript ? "normal" : "italic" }}
-        >
-          {transcript || "Your transcription will appear here..."}
-        </p>
-      </div>
+      <div className="bg-white p-6 rounded-xl shadow-sm min-h-[300px] flex flex-col">
+        <div className="flex-1 text-lg leading-relaxed text-gray-700">
+          <p
+            className={
+              transcript || interimTranscript
+                ? "font-normal"
+                : "italic text-gray-400"
+            }
+          >
+            {transcript}
+            <span className="text-gray-400"> {interimTranscript}</span>
+            {!transcript &&
+              !interimTranscript &&
+              "Your transcription will appear here once you start speaking..."}
+          </p>
+        </div>
 
-      <div style={{ marginTop: "1rem" }}>
-        {!isRecording ? (
-          <button
-            onClick={startStreaming}
-            style={{
-              background: "green",
-              color: "white",
-              padding: "1rem 2rem",
-              fontSize: "1rem",
-              cursor: "pointer",
-            }}
-          >
-            Start Microphone
-          </button>
-        ) : (
-          <button
-            onClick={stopStreaming}
-            style={{
-              background: "red",
-              color: "white",
-              padding: "1rem 2rem",
-              fontSize: "1rem",
-              cursor: "pointer",
-            }}
-          >
-            Stop Recording
-          </button>
-        )}
+        <div className="mt-8 flex justify-center border-t pt-6">
+          {!isRecording ? (
+            <button
+              onClick={startStreaming}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-semibold shadow-md transition transform hover:scale-105"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+                />
+              </svg>
+              Start Microphone
+            </button>
+          ) : (
+            <button
+              onClick={stopStreaming}
+              className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-full font-semibold shadow-md transition transform hover:scale-105 animate-pulse"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"
+                />
+              </svg>
+              Stop Recording
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

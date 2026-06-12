@@ -6,32 +6,32 @@ import Dashboard from "./Dashboard";
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuthenticationStatus();
-  if (isLoading) return <div>Loading session...</div>;
+  if (isLoading)
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
   if (!isAuthenticated) return <Navigate to="/" />;
   return children;
 };
 
 export default function App() {
   return (
-    <div
-      style={{
-        maxWidth: "800px",
-        margin: "0 auto",
-        padding: "2rem",
-        fontFamily: "sans-serif",
-      }}
-    >
-      <Routes>
-        <Route path="/" element={<Auth />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
+    <div className="min-h-screen bg-gray-50 text-gray-800 font-sans">
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <Routes>
+          <Route path="/" element={<Auth />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </div>
     </div>
   );
 }
