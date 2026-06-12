@@ -26,9 +26,7 @@ export default function Dashboard() {
       socket.onopen = () => {
         setIsRecording(true);
         // 3. Start MediaRecorder
-        mediaRecorderRef.current = new MediaRecorder(stream, {
-          mimeType: "audio/webm",
-        });
+        mediaRecorderRef.current = new MediaRecorder(stream);
 
         // 4. Send audio chunks every 250ms
         mediaRecorderRef.current.addEventListener("dataavailable", (event) => {
